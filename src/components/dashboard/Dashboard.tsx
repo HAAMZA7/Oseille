@@ -152,29 +152,47 @@ export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount }: Das
                                 <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 rounded-xl"><LucidePieChart size={20} /></div>
                                 <h3 className="font-black text-slate-900 dark:text-white transition-colors">Répartition</h3>
                             </div>
-                            <div className="h-[250px] w-full">
-                                {pieData.length > 0 ? (
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <PieChart>
-                                            <Pie
-                                                data={pieData}
-                                                innerRadius={60}
-                                                outerRadius={80}
-                                                paddingAngle={5}
-                                                dataKey="value"
-                                                stroke="none"
+                            <div className="w-full">
+                                {pieData.length > 0 ? (() => {
+                                    const total = pieData.reduce((acc, d) => acc + d.value, 0);
+                                    let cumulative = 0;
+                                    const gradientParts = pieData.map(d => {
+                                        const start = (cumulative / total) * 360;
+                                        cumulative += d.value;
+                                        const end = (cumulative / total) * 360;
+                                        return `${d.color} ${start}deg ${end}deg`;
+                                    }).join(', ');
+
+                                    return (
+                                        <div className="flex flex-col items-center">
+                                            {/* CSS Donut Chart */}
+                                            <div
+                                                className="w-36 h-36 rounded-full relative"
+                                                style={{
+                                                    background: `conic-gradient(${gradientParts})`,
+                                                }}
                                             >
+                                                <div className="absolute inset-4 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center transition-colors">
+                                                    <div className="text-center">
+                                                        <p className="text-2xl font-black text-slate-900 dark:text-white">{total.toFixed(0)}€</p>
+                                                        <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Total</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {/* Legend */}
+                                            <div className="flex flex-wrap justify-center gap-3 mt-6">
                                                 {pieData.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                                    <div key={index} className="flex items-center gap-2 text-xs bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-full">
+                                                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                                                        <span className="text-slate-600 dark:text-slate-400 font-medium">{entry.name}</span>
+                                                        <span className="text-slate-900 dark:text-white font-bold">{entry.value.toFixed(0)}€</span>
+                                                    </div>
                                                 ))}
-                                            </Pie>
-                                            <RechartsTooltip
-                                                contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                            />
-                                        </PieChart>
-                                    </ResponsiveContainer>
-                                ) : (
-                                    <div className="h-full flex flex-col items-center justify-center text-slate-400 font-medium italic text-sm">
+                                            </div>
+                                        </div>
+                                    );
+                                })() : (
+                                    <div className="h-[200px] flex flex-col items-center justify-center text-slate-400 font-medium italic text-sm">
                                         Pas de dépenses ce mois-ci.
                                     </div>
                                 )}
