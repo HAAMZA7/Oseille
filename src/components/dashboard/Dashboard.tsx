@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import {
     PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip,
-    BarChart, Bar, XAxis, YAxis, CartesianGrid
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Area, AreaChart
 } from 'recharts';
 import { UserProfile, CATEGORIES } from '@/types';
 import { useFinanceData } from '@/hooks/useFinanceData';
@@ -92,6 +92,35 @@ export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount, theme
             const income = monthTxsForBar.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
             const expense = monthTxsForBar.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
             result.push({ name: months[d.getMonth()], income, expense });
+        }
+        return result;
+    }, [transactions]);
+
+    // 12-month balance evolution
+    const balanceHistory = useMemo(() => {
+        const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+        const result = [];
+        const now = new Date();
+        let cumulativeBalance = 0;
+
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+
+            const monthTxs = transactions.filter(t => {
+                const txDate = new Date(t.date);
+                return txDate <= monthEnd;
+            });
+
+            const income = monthTxs.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+            const expense = monthTxs.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+            cumulativeBalance = income - expense;
+
+            result.push({
+                name: months[d.getMonth()],
+                balance: cumulativeBalance,
+                month: `${months[d.getMonth()]} ${d.getFullYear()}`
+            });
         }
         return result;
     }, [transactions]);
@@ -272,6 +301,40 @@ export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount, theme
                                         <Bar dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} />
                                         <Bar dataKey="expense" fill="#f43f5e" radius={[4, 4, 0, 0]} />
                                     </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </section>
+
+                        {/* Balance Evolution Chart */}
+                        <section className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 p-6 shadow-sm transition-colors">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 rounded-xl"><TrendingUp size={20} /></div>
+                                <h3 className="font-black text-slate-900 dark:text-white transition-colors">Évolution du Solde</h3>
+                            </div>
+                            <div className="h-[180px] w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={balanceHistory}>
+                                        <defs>
+                                            <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
+                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 'bold' }} />
+                                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9 }} tickFormatter={(v) => `${v}€`} width={50} />
+                                        <RechartsTooltip
+                                            formatter={(value: number) => [`${value.toFixed(0)}€`, 'Solde']}
+                                            labelFormatter={(label) => `Solde en ${label}`}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="balance"
+                                            stroke="#6366f1"
+                                            strokeWidth={2}
+                                            fill="url(#balanceGradient)"
+                                        />
+                                    </AreaChart>
                                 </ResponsiveContainer>
                             </div>
                         </section>

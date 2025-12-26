@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Search, MoreHorizontal } from 'lucide-react';
+import { Trash2, Search, MoreHorizontal, Filter, RefreshCw } from 'lucide-react';
 import { Transaction, CATEGORIES } from '@/types';
 
 interface TransactionListProps {
@@ -12,16 +12,24 @@ interface TransactionListProps {
 }
 
 export const TransactionList = ({ transactions, search, onSearchChange, onDelete, monthName }: TransactionListProps) => {
+    const [categoryFilter, setCategoryFilter] = useState<string>('all');
+
     const formatDate = (ds: string) => {
         const d = new Date(ds);
         return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
     };
 
     const groupedTxs = React.useMemo(() => {
-        const filtered = transactions.filter(t =>
+        let filtered = transactions.filter(t =>
             t.title.toLowerCase().includes(search.toLowerCase()) ||
             t.category.toLowerCase().includes(search.toLowerCase())
         );
+
+        // Apply category filter
+        if (categoryFilter !== 'all') {
+            filtered = filtered.filter(t => t.category === categoryFilter);
+        }
+
         const sorted = filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
         const groups: Record<string, Transaction[]> = {};
@@ -38,21 +46,55 @@ export const TransactionList = ({ transactions, search, onSearchChange, onDelete
             groups[key].push(t);
         });
         return groups;
-    }, [transactions, search]);
+    }, [transactions, search, categoryFilter]);
+
+    const resetFilters = () => {
+        onSearchChange('');
+        setCategoryFilter('all');
+    };
 
     return (
         <section className="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 p-8 shadow-sm transition-colors">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-8">
-                <h3 className="text-xl font-black text-slate-900 dark:text-white transition-colors">Opérations de {monthName}</h3>
-                <div className="relative w-full sm:w-64 group">
-                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-                    <input
-                        type="text"
-                        placeholder="Chercher..."
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 ring-indigo-500/20 dark:text-white text-sm font-medium transition-all border border-transparent dark:border-slate-700 focus:border-indigo-500"
-                        value={search}
-                        onChange={e => onSearchChange(e.target.value)}
-                    />
+            <div className="flex flex-col gap-4 mb-8">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white transition-colors">Opérations de {monthName}</h3>
+                    <div className="relative w-full sm:w-64 group">
+                        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                        <input
+                            type="text"
+                            placeholder="Chercher..."
+                            className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 ring-indigo-500/20 dark:text-white text-sm font-medium transition-all border border-transparent dark:border-slate-700 focus:border-indigo-500"
+                            value={search}
+                            onChange={e => onSearchChange(e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                {/* Filters Row */}
+                <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-2 text-slate-400">
+                        <Filter size={14} />
+                        <span className="text-xs font-bold uppercase">Filtres:</span>
+                    </div>
+                    <select
+                        value={categoryFilter}
+                        onChange={(e) => setCategoryFilter(e.target.value)}
+                        className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-xl text-sm font-medium border border-slate-100 dark:border-slate-700"
+                    >
+                        <option value="all">Toutes catégories</option>
+                        {CATEGORIES.map(cat => (
+                            <option key={cat.id} value={cat.id}>{cat.id}</option>
+                        ))}
+                    </select>
+                    {(search || categoryFilter !== 'all') && (
+                        <button
+                            onClick={resetFilters}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-rose-50 dark:bg-rose-500/10 text-rose-500 rounded-xl text-xs font-bold hover:bg-rose-100 transition-colors"
+                        >
+                            <RefreshCw size={12} />
+                            Réinitialiser
+                        </button>
+                    )}
                 </div>
             </div>
 
