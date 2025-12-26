@@ -11,7 +11,9 @@ import {
     ChevronRight,
     PieChart as LucidePieChart,
     BarChart3,
-    Lightbulb
+    Lightbulb,
+    Moon,
+    Sun
 } from 'lucide-react';
 import {
     PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip,
@@ -29,10 +31,13 @@ interface DashboardProps {
     onLogout: () => void;
     onUpdateUser: (u: UserProfile) => void;
     onDeleteAccount: () => void;
+    theme: 'light' | 'dark';
+    toggleTheme: () => void;
 }
 
-export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount }: DashboardProps) => {
+export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount, theme, toggleTheme }: DashboardProps) => {
     const {
+        transactions,
         monthTxs,
         stats,
         currentMonth,
@@ -64,26 +69,64 @@ export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount }: Das
     }, [monthTxs]);
 
     const barData = useMemo(() => {
-        return [
-            { name: 'Jan', income: 4000, expense: 2400 },
-            { name: 'Feb', income: 3000, expense: 1398 },
-            { name: 'Mar', income: 2000, expense: 9800 },
-            { name: 'Apr', income: 2780, expense: 3908 },
-            { name: 'May', income: 1890, expense: 4800 },
-            { name: 'Jun', income: stats.income, expense: stats.expense },
-        ].slice(-6);
-    }, [stats]);
+        const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+        const result = [];
+        const now = new Date();
+
+        for (let i = 5; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const monthTxsForBar = transactions.filter(t => {
+                const txDate = new Date(t.date);
+                return txDate.getMonth() === d.getMonth() && txDate.getFullYear() === d.getFullYear();
+            });
+            const income = monthTxsForBar.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+            const expense = monthTxsForBar.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+            result.push({ name: months[d.getMonth()], income, expense });
+        }
+        return result;
+    }, [transactions]);
 
     const tip = useMemo(() => {
-        const tips = [
-            "Pensez à épargner au moins 20% de vos revenus ce mois-ci.",
-            "Vos dépenses en 'Loisirs' sont élevées, essayez de fixer une limite.",
-            "Bonne nouvelle : vos revenus ont augmenté de 5% par rapport au mois dernier !",
-            "Le saviez-vous ? Oseille stocke vos données uniquement sur votre navigateur.",
-            "Un petit café en moins par jour ? C'est 90€ d'économie par mois !"
-        ];
+        // Intelligent tips based on actual spending
+        const tips: string[] = [];
+
+        // Check savings rate
+        if (stats.income > 0) {
+            const savingsRate = ((stats.income - stats.expense) / stats.income) * 100;
+            if (savingsRate < 10) {
+                tips.push(`⚠️ Attention : vous n'épargnez que ${savingsRate.toFixed(0)}% de vos revenus ce mois-ci. Visez au moins 20% !`);
+            } else if (savingsRate >= 20) {
+                tips.push(`🎉 Bravo ! Vous épargnez ${savingsRate.toFixed(0)}% de vos revenus ce mois-ci, c'est excellent !`);
+            }
+        }
+
+        // Check top expense category
+        const expensesByCategory: Record<string, number> = {};
+        monthTxs.filter(t => t.type === 'expense').forEach(t => {
+            expensesByCategory[t.category] = (expensesByCategory[t.category] || 0) + t.amount;
+        });
+        const topCategory = Object.entries(expensesByCategory).sort((a, b) => b[1] - a[1])[0];
+        if (topCategory && topCategory[1] > stats.expense * 0.4) {
+            tips.push(`📊 Vos dépenses en "${topCategory[0]}" représentent ${((topCategory[1] / stats.expense) * 100).toFixed(0)}% de vos dépenses totales.`);
+        }
+
+        // Budget alert
+        if (user.budget && stats.expense > user.budget * 0.8) {
+            const pct = ((stats.expense / user.budget) * 100).toFixed(0);
+            tips.push(`🔔 Vous avez utilisé ${pct}% de votre budget mensuel (${user.budget}€).`);
+        }
+
+        // Default tips
+        if (tips.length === 0) {
+            tips.push(
+                "💡 Le saviez-vous ? Oseille stocke vos données uniquement sur votre navigateur.",
+                "☕ Un petit café en moins par jour ? C'est 90€ d'économie par mois !",
+                "📈 Ajoutez vos transactions régulièrement pour un suivi précis."
+            );
+        }
+
         return tips[Math.floor(Math.random() * tips.length)];
-    }, [currentMonth]);
+    }, [monthTxs, stats, user.budget]);
 
     const changeMonth = (offset: number) => {
         const d = new Date(currentMonth);
@@ -113,6 +156,13 @@ export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount }: Das
                             <button onClick={() => changeMonth(1)} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors"><ChevronRight size={20} /></button>
                         </div>
 
+                        <button
+                            onClick={toggleTheme}
+                            className="p-2.5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-slate-500 hover:text-indigo-600 transition-all shadow-sm"
+                            title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+                        >
+                            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                        </button>
                         <button onClick={() => setIsSettingsOpen(true)} className="p-2.5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-slate-500 hover:text-indigo-600 transition-all shadow-sm">
                             <SettingsIcon size={20} />
                         </button>

@@ -110,6 +110,8 @@ export default function App() {
                     setCurrentUser(updated);
                 }}
                 onDeleteAccount={deleteAccount}
+                theme={isDark ? 'dark' : 'light'}
+                toggleTheme={toggleDark}
             />
         );
     }
