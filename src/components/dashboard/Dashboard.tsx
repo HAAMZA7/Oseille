@@ -21,10 +21,14 @@ import {
 } from 'recharts';
 import { UserProfile, CATEGORIES } from '@/types';
 import { useFinanceData } from '@/hooks/useFinanceData';
+import { useSavingsGoals } from '@/hooks/useSavingsGoals';
+import { useRecurringTransactions } from '@/hooks/useRecurringTransactions';
 import { StatCard, BudgetProgress } from './DashboardComponents';
 import { TransactionList } from './TransactionList';
 import { TransactionModal } from './TransactionModal';
 import { SettingsModal } from './SettingsModal';
+import { SavingsGoals } from './SavingsGoals';
+import { RecurringTransactions } from './RecurringTransactions';
 
 interface DashboardProps {
     user: UserProfile;
@@ -52,6 +56,12 @@ export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount, theme
     const [isTxModalOpen, setIsTxModalOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [search, setSearch] = useState("");
+
+    // Savings Goals
+    const { goals, addGoal, addToGoal, deleteGoal } = useSavingsGoals(user);
+
+    // Recurring Transactions
+    const { recurringTxs, addRecurring, deleteRecurring, toggleRecurring } = useRecurringTransactions(user, addTransaction);
 
     const monthName = currentMonth.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 
@@ -274,6 +284,22 @@ export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount, theme
                             </div>
                             <p className="text-sm font-medium leading-relaxed opacity-90">{tip}</p>
                         </section>
+
+                        {/* Savings Goals */}
+                        <SavingsGoals
+                            goals={goals}
+                            onAddGoal={addGoal}
+                            onAddToGoal={addToGoal}
+                            onDeleteGoal={deleteGoal}
+                        />
+
+                        {/* Recurring Transactions */}
+                        <RecurringTransactions
+                            recurringTxs={recurringTxs}
+                            onAdd={addRecurring}
+                            onDelete={deleteRecurring}
+                            onToggle={toggleRecurring}
+                        />
                     </div>
                 </div>
             </main>

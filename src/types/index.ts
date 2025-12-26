@@ -11,6 +11,15 @@ import {
 } from "lucide-react";
 
 export type TransactionType = 'income' | 'expense';
+export type RecurrenceFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly';
+
+export interface Account {
+    id: string;
+    name: string;
+    type: 'checking' | 'savings' | 'cash' | 'investment';
+    color: string;
+    icon?: string;
+}
 
 export interface UserProfile {
     id: string;
@@ -19,6 +28,8 @@ export interface UserProfile {
     pin: string;
     isPro?: boolean;
     budget?: number;
+    accounts?: Account[];
+    accentColor?: string;
 }
 
 export interface Transaction {
@@ -29,6 +40,36 @@ export interface Transaction {
     type: TransactionType;
     category: string;
     date: string;
+    accountId?: string;
+    isRecurring?: boolean;
+    recurringId?: string;
+}
+
+export interface RecurringTransaction {
+    id: string;
+    userId: string;
+    title: string;
+    amount: number;
+    type: TransactionType;
+    category: string;
+    frequency: RecurrenceFrequency;
+    startDate: string;
+    endDate?: string;
+    lastGenerated?: string;
+    accountId?: string;
+    isActive: boolean;
+}
+
+export interface SavingsGoal {
+    id: string;
+    userId: string;
+    name: string;
+    targetAmount: number;
+    currentAmount: number;
+    deadline?: string;
+    color: string;
+    icon?: string;
+    createdAt: string;
 }
 
 export const CATEGORIES = [
@@ -42,3 +83,16 @@ export const CATEGORIES = [
     { id: 'Freelance', icon: Briefcase, color: 'text-cyan-500 bg-cyan-50 dark:bg-cyan-500/10', hex: '#06b6d4' },
     { id: 'Autre', icon: MoreHorizontal, color: 'text-slate-500 bg-slate-50 dark:bg-slate-500/10', hex: '#64748b' },
 ];
+
+export const ACCOUNT_TYPES = [
+    { id: 'checking', name: 'Compte Courant', color: '#3b82f6' },
+    { id: 'savings', name: 'Épargne', color: '#10b981' },
+    { id: 'cash', name: 'Espèces', color: '#f59e0b' },
+    { id: 'investment', name: 'Investissement', color: '#8b5cf6' },
+];
+
+export const GOAL_COLORS = [
+    '#f43f5e', '#f97316', '#eab308', '#22c55e', '#10b981',
+    '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899'
+];
+
