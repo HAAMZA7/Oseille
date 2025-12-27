@@ -100,11 +100,21 @@ export const TransactionList = ({ transactions, search, onSearchChange, onDelete
 
             <div className="space-y-6">
                 {Object.keys(groupedTxs).length === 0 ? (
-                    <div className="py-20 text-center flex flex-col items-center justify-center border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-3xl">
-                        <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-slate-300 dark:text-slate-600">
-                            <Search size={24} />
+                    <div className="py-16 text-center flex flex-col items-center justify-center border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-3xl bg-slate-50/50 dark:bg-slate-800/20">
+                        <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 rounded-full flex items-center justify-center mb-6 text-indigo-400">
+                            <span className="text-4xl">💸</span>
                         </div>
-                        <p className="text-slate-400 dark:text-slate-500 font-medium italic">Aucun mouvement trouvé.</p>
+                        <h4 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-2">Aucune opération</h4>
+                        <p className="text-slate-400 dark:text-slate-500 text-sm max-w-xs mb-4">
+                            {search || categoryFilter !== 'all'
+                                ? "Aucun résultat pour ces filtres."
+                                : "Commencez à suivre vos finances en ajoutant votre première transaction !"}
+                        </p>
+                        {!search && categoryFilter === 'all' && (
+                            <p className="text-indigo-500 dark:text-indigo-400 text-sm font-medium animate-bounce">
+                                👇 Cliquez sur le + en bas à droite
+                            </p>
+                        )}
                     </div>
                 ) : (
                     Object.keys(groupedTxs).map(dateKey => (

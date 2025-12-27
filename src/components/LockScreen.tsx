@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Lock, X } from 'lucide-react';
+import { Lock, X, UserMinus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from './ui/ThemeToggle';
 
@@ -7,11 +7,12 @@ interface LockScreenProps {
     userName: string;
     correctPin: string;
     onUnlock: () => void;
+    onChangeUser: () => void;
     isDark: boolean;
     toggleDark: () => void;
 }
 
-export const LockScreen = ({ userName, correctPin, onUnlock, isDark, toggleDark }: LockScreenProps) => {
+export const LockScreen = ({ userName, correctPin, onUnlock, onChangeUser, isDark, toggleDark }: LockScreenProps) => {
     const [pin, setPin] = useState("");
     const [error, setError] = useState(false);
 
@@ -107,6 +108,15 @@ export const LockScreen = ({ userName, correctPin, onUnlock, isDark, toggleDark 
                     <X size={28} />
                 </button>
             </div>
+
+            {/* Change User Button */}
+            <button
+                onClick={onChangeUser}
+                className="mt-8 flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-indigo-600 transition-colors text-sm font-medium"
+            >
+                <UserMinus size={16} />
+                Changer de compte
+            </button>
         </div>
     );
 };

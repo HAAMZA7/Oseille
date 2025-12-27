@@ -96,6 +96,11 @@ export default function App() {
                 isDark={isDark}
                 toggleDark={toggleDark}
                 onUnlock={() => setIsLocked(false)}
+                onChangeUser={() => {
+                    setCurrentUser(null);
+                    setIsLocked(true);
+                    setView('auth');
+                }}
             />
         );
     }
