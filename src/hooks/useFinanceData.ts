@@ -1,26 +1,43 @@
 import { useState, useEffect, useMemo } from 'react';
+import { collection, addDoc, deleteDoc, doc, onSnapshot, query, where, orderBy } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { UserProfile, Transaction } from '@/types';
 
 export const useFinanceData = (currentUser: UserProfile | null) => {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [loading, setLoading] = useState(true);
 
+    // Real-time Firestore sync
     useEffect(() => {
-        if (currentUser) {
-            const saved = localStorage.getItem(`txs_${currentUser.id}`);
-            if (saved) {
-                setTransactions(JSON.parse(saved));
-            } else {
-                setTransactions([]);
-            }
+        if (!currentUser?.id) {
+            setTransactions([]);
+            setLoading(false);
+            return;
         }
-    }, [currentUser]);
 
-    useEffect(() => {
-        if (currentUser && transactions.length > 0) {
-            localStorage.setItem(`txs_${currentUser.id}`, JSON.stringify(transactions));
-        }
-    }, [transactions, currentUser]);
+        const q = query(
+            collection(db, 'transactions'),
+            where('userId', '==', currentUser.id)
+        );
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const txs = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            })) as Transaction[];
+
+            // Sort by date descending
+            txs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            setTransactions(txs);
+            setLoading(false);
+        }, (error) => {
+            console.error('Firestore error:', error);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [currentUser?.id]);
 
     const monthTxs = useMemo(() => {
         return transactions.filter(t => {
@@ -36,16 +53,37 @@ export const useFinanceData = (currentUser: UserProfile | null) => {
         return { income, expense, balance };
     }, [monthTxs]);
 
-    const addTransaction = (tx: Transaction) => {
-        setTransactions(prev => [...prev, tx]);
+    const addTransaction = async (tx: Transaction) => {
+        if (!currentUser?.id) return;
+        try {
+            const { id, ...txData } = tx;
+            await addDoc(collection(db, 'transactions'), {
+                ...txData,
+                userId: currentUser.id
+            });
+        } catch (error) {
+            console.error('Error adding transaction:', error);
+        }
     };
 
-    const deleteTransaction = (id: string) => {
-        setTransactions(prev => prev.filter(t => t.id !== id));
+    const deleteTransaction = async (txId: string) => {
+        try {
+            await deleteDoc(doc(db, 'transactions', txId));
+        } catch (error) {
+            console.error('Error deleting transaction:', error);
+        }
     };
 
-    const importData = (data: Transaction[]) => {
-        setTransactions(data);
+    const importData = async (data: Transaction[]) => {
+        if (!currentUser?.id) return;
+        // Import each transaction to Firestore
+        for (const tx of data) {
+            const { id, ...txData } = tx;
+            await addDoc(collection(db, 'transactions'), {
+                ...txData,
+                userId: currentUser.id
+            });
+        }
     };
 
     const exportData = () => {
@@ -83,6 +121,7 @@ export const useFinanceData = (currentUser: UserProfile | null) => {
         deleteTransaction,
         importData,
         exportData,
-        exportToCSV
+        exportToCSV,
+        loading
     };
 };
