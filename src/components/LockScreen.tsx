@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Lock, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from './ui/ThemeToggle';
@@ -14,6 +14,20 @@ interface LockScreenProps {
 export const LockScreen = ({ userName, correctPin, onUnlock, isDark, toggleDark }: LockScreenProps) => {
     const [pin, setPin] = useState("");
     const [error, setError] = useState(false);
+
+    // Listen for keyboard input
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key >= '0' && e.key <= '9') {
+                handleKeyPress(e.key);
+            } else if (e.key === 'Backspace') {
+                setPin(prev => prev.slice(0, -1));
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [pin, correctPin]);
 
     const handleKeyPress = (num: string) => {
         if (pin.length < 4) {
