@@ -317,14 +317,20 @@ export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount, theme
                                 <h3 className="font-black text-slate-900 dark:text-white transition-colors">Tendances</h3>
                             </div>
                             <div className="h-[200px] w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={barData}>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
-                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold' }} />
-                                        <Bar dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} />
-                                        <Bar dataKey="expense" fill="#f43f5e" radius={[4, 4, 0, 0]} />
-                                    </BarChart>
-                                </ResponsiveContainer>
+                                {barData.some(d => d.income > 0 || d.expense > 0) ? (
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={barData}>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
+                                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold' }} />
+                                            <Bar dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} />
+                                            <Bar dataKey="expense" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="h-full flex items-center justify-center text-slate-400 text-sm italic">
+                                        Pas assez de données historiques
+                                    </div>
+                                )}
                             </div>
                         </section>
 
@@ -335,30 +341,36 @@ export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount, theme
                                 <h3 className="font-black text-slate-900 dark:text-white transition-colors">Évolution du Solde</h3>
                             </div>
                             <div className="h-[180px] w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={balanceHistory}>
-                                        <defs>
-                                            <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                                                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                                            </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
-                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 'bold' }} />
-                                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9 }} tickFormatter={(v) => `${v}€`} width={50} />
-                                        <RechartsTooltip
-                                            formatter={(value: number) => [`${value.toFixed(0)}€`, 'Solde']}
-                                            labelFormatter={(label) => `Solde en ${label}`}
-                                        />
-                                        <Area
-                                            type="monotone"
-                                            dataKey="balance"
-                                            stroke="#6366f1"
-                                            strokeWidth={2}
-                                            fill="url(#balanceGradient)"
-                                        />
-                                    </AreaChart>
-                                </ResponsiveContainer>
+                                {balanceHistory.some(d => d.balance !== 0) ? (
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={balanceHistory}>
+                                            <defs>
+                                                <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                                                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
+                                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 'bold' }} />
+                                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9 }} tickFormatter={(v) => `${v}€`} width={50} />
+                                            <RechartsTooltip
+                                                formatter={(value: number) => [`${value.toFixed(0)}€`, 'Solde']}
+                                                labelFormatter={(label) => `Solde en ${label}`}
+                                            />
+                                            <Area
+                                                type="monotone"
+                                                dataKey="balance"
+                                                stroke="#6366f1"
+                                                strokeWidth={2}
+                                                fill="url(#balanceGradient)"
+                                            />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="h-full flex items-center justify-center text-slate-400 text-sm italic">
+                                        Ajoutez des transactions pour voir l'évolution
+                                    </div>
+                                )}
                             </div>
                         </section>
 
