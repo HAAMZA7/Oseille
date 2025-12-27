@@ -13,7 +13,8 @@ import {
     BarChart3,
     Lightbulb,
     Moon,
-    Sun
+    Sun,
+    AlertTriangle
 } from 'lucide-react';
 import {
     PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip,
@@ -23,6 +24,7 @@ import { UserProfile, CATEGORIES } from '@/types';
 import { useFinanceData } from '@/hooks/useFinanceData';
 import { useSavingsGoals } from '@/hooks/useSavingsGoals';
 import { useRecurringTransactions } from '@/hooks/useRecurringTransactions';
+import { usePdfExport } from '@/hooks/usePdfExport';
 import { StatCard, BudgetProgress } from './DashboardComponents';
 import { TransactionList } from './TransactionList';
 import { TransactionModal } from './TransactionModal';
@@ -62,6 +64,9 @@ export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount, theme
 
     // Recurring Transactions
     const { recurringTxs, addRecurring, deleteRecurring, toggleRecurring } = useRecurringTransactions(user, addTransaction);
+
+    // PDF Export
+    const { exportMonthlyReport } = usePdfExport();
 
     const monthName = currentMonth.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 
@@ -202,6 +207,24 @@ export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount, theme
                         >
                             {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
                         </button>
+
+                        {/* Budget Warning Badge */}
+                        {user.budget && stats.expense > user.budget * 0.8 && (
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className="relative"
+                            >
+                                <div className="p-2.5 bg-amber-100 dark:bg-amber-500/20 border border-amber-200 dark:border-amber-500/30 rounded-xl text-amber-600 animate-pulse cursor-pointer"
+                                    title={`Budget: ${((stats.expense / user.budget) * 100).toFixed(0)}% utilisé`}
+                                >
+                                    <AlertTriangle size={20} />
+                                </div>
+                                <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full animate-ping" />
+                                <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full" />
+                            </motion.div>
+                        )}
+
                         <button onClick={() => setIsSettingsOpen(true)} className="p-2.5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-slate-500 hover:text-indigo-600 transition-all shadow-sm">
                             <SettingsIcon size={20} />
                         </button>
@@ -394,6 +417,7 @@ export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount, theme
                         currentUser={user}
                         onUpdateUser={onUpdateUser}
                         onExportCSV={exportToCSV}
+                        onExportPDF={() => exportMonthlyReport({ user, transactions, month: currentMonth, stats })}
                         onExportJSON={exportData}
                         onImportJSON={(e) => {
                             const file = e.target.files?.[0];

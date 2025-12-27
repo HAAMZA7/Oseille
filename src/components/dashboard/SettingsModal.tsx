@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { X, Heart, FileSpreadsheet, Download, Upload, ArrowRight, AlertTriangle, Trash2 } from 'lucide-react';
+import { X, Heart, FileSpreadsheet, Download, Upload, ArrowRight, AlertTriangle, Trash2, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { UserProfile } from '@/types';
 
@@ -9,6 +9,7 @@ interface SettingsModalProps {
     currentUser: UserProfile;
     onUpdateUser: (updated: UserProfile) => void;
     onExportCSV: () => void;
+    onExportPDF: () => void;
     onExportJSON: () => void;
     onImportJSON: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onDeleteAccount: () => void;
@@ -20,6 +21,7 @@ export const SettingsModal = ({
     currentUser,
     onUpdateUser,
     onExportCSV,
+    onExportPDF,
     onExportJSON,
     onImportJSON,
     onDeleteAccount
@@ -94,6 +96,11 @@ export const SettingsModal = ({
                     <div className="grid gap-2">
                         <button onClick={onExportCSV} className="w-full p-4 bg-emerald-50 dark:bg-emerald-500/10 rounded-2xl font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-between hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all border border-emerald-100 dark:border-emerald-500/20">
                             <span className="flex items-center gap-3"><FileSpreadsheet size={18} /> Exporter en CSV</span>
+                            <Download size={16} className="opacity-50" />
+                        </button>
+
+                        <button onClick={onExportPDF} className="w-full p-4 bg-rose-50 dark:bg-rose-500/10 rounded-2xl font-bold text-rose-600 dark:text-rose-400 flex items-center justify-between hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-all border border-rose-100 dark:border-rose-500/20">
+                            <span className="flex items-center gap-3"><FileText size={18} /> Rapport PDF mensuel</span>
                             <Download size={16} className="opacity-50" />
                         </button>
 
