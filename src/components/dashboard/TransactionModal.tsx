@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Transaction, TransactionType, CATEGORIES, UserProfile } from '@/types';
+import { Transaction, TransactionType, EXPENSE_CATEGORIES, INCOME_CATEGORIES, UserProfile } from '@/types';
 
 interface TransactionModalProps {
     isOpen: boolean;
@@ -101,9 +101,9 @@ export const TransactionModal = ({ isOpen, onClose, currentUser, currentMonth, o
                     <input name="title" type="text" placeholder="Titre (Optionnel)" className="w-full p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl outline-none text-slate-900 dark:text-white font-bold placeholder:text-slate-400 transition-colors focus:ring-2 focus:ring-indigo-500/20" />
 
                     <div className="grid grid-cols-4 gap-2">
-                        {CATEGORIES.map(c => (
+                        {(type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES).map((c, idx) => (
                             <label key={c.id} className="cursor-pointer">
-                                <input type="radio" name="category" value={c.id} defaultChecked={c.id === 'Courses'} className="peer sr-only" />
+                                <input type="radio" name="category" value={c.id} defaultChecked={idx === 0} className="peer sr-only" />
                                 <div className="flex flex-col items-center justify-center p-2 rounded-xl border-2 border-transparent bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 peer-checked:bg-indigo-50 peer-checked:border-indigo-500 peer-checked:text-indigo-600 dark:peer-checked:bg-indigo-500/10 dark:peer-checked:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">
                                     <c.icon size={20} className="mb-1" />
                                     <span className="text-[9px] font-bold uppercase truncate w-full text-center">{c.id}</span>
