@@ -349,6 +349,18 @@ export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount, theme
                     />
                 )}
             </AnimatePresence>
+
+            {/* Signature Footer */}
+            <footer className="fixed bottom-0 left-0 right-0 py-3 text-center bg-gradient-to-t from-slate-100 dark:from-slate-900 to-transparent pointer-events-none z-10">
+                <div className="signature-container pointer-events-auto">
+                    <p className="text-xs text-slate-400 flex items-center justify-center gap-1">
+                        Made with <span className="heart-emoji">❤️</span> by <strong className="text-slate-500 dark:text-slate-300">Hamza DJOUDI</strong>
+                    </p>
+                    <a href="https://djoudi.dev" target="_blank" rel="noopener" className="signature-link text-sm font-bold">
+                        djoudi.dev
+                    </a>
+                </div>
+            </footer>
         </div>
     );
 };

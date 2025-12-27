@@ -98,3 +98,68 @@ body {
 .glassmorphism {
   backdrop-filter: blur(10px);
 }
+
+/* Signature */
+.signature-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.heart-emoji {
+  display: inline-block;
+  animation: heartbeat 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.5));
+}
+
+@keyframes heartbeat {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  15% {
+    transform: scale(1.25);
+  }
+
+  30% {
+    transform: scale(1);
+  }
+
+  45% {
+    transform: scale(1.2);
+  }
+
+  60% {
+    transform: scale(1);
+  }
+}
+
+.signature-link {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6, #10b981, #8b5cf6, #6366f1);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-flow 3s linear infinite;
+  text-decoration: none;
+  transition: filter 0.3s;
+}
+
+.signature-link:hover {
+  filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.5));
+  animation-duration: 1s;
+}
+
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
