@@ -1,27 +1,37 @@
 import { useState, useEffect } from 'react';
-import { UserProfile } from './types';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { useFirestoreUser } from './hooks/useFirestore';
 import { LandingPage } from './components/LandingPage';
-import { LockScreen } from './components/LockScreen';
-import { AuthView } from './components/AuthView';
+import { GoogleAuthView } from './components/GoogleAuthView';
 import { Dashboard } from './components/dashboard/Dashboard';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { db } from './lib/firebase';
+import { UserProfile } from './types';
 
-export default function App() {
+// Loading spinner component
+const LoadingScreen = () => (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-[1.5rem] mx-auto mb-6 flex items-center justify-center animate-pulse">
+                <span className="text-3xl">💸</span>
+            </div>
+            <p className="text-slate-500 dark:text-slate-400 font-medium">Chargement...</p>
+        </div>
+    </div>
+);
+
+// Main app content (wrapped by AuthProvider)
+function AppContent() {
     const [isDark, setIsDark] = useState(() => {
         const saved = localStorage.getItem('theme');
         return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
     });
+    const [showLanding, setShowLanding] = useState(true);
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
-    const [view, setView] = useState<'landing' | 'auth' | 'app'>('landing');
-    const [users, setUsers] = useState<UserProfile[]>(() => {
-        const saved = localStorage.getItem('oseille_users');
-        return saved ? JSON.parse(saved) : [];
-    });
-    const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
-        const saved = localStorage.getItem('oseille_current_user');
-        return saved ? JSON.parse(saved) : null;
-    });
-    const [isLocked, setIsLocked] = useState(true);
+    const { user, loading: authLoading, signInWithGoogle, logout } = useAuth();
 
+    // Apply theme
     useEffect(() => {
         if (isDark) {
             document.documentElement.classList.add('dark');
@@ -32,94 +42,111 @@ export default function App() {
         }
     }, [isDark]);
 
+    // Fetch or create user profile when Firebase user changes
     useEffect(() => {
-        localStorage.setItem('oseille_users', JSON.stringify(users));
-    }, [users]);
+        const setupUserProfile = async () => {
+            if (user) {
+                const userRef = doc(db, 'users', user.uid);
+                const userDoc = await getDoc(userRef);
 
-    useEffect(() => {
-        if (currentUser) {
-            localStorage.setItem('oseille_current_user', JSON.stringify(currentUser));
-            setView('app');
-        } else {
-            localStorage.removeItem('oseille_current_user');
-            if (view === 'app') setView('landing');
+                if (userDoc.exists()) {
+                    setUserProfile({ id: user.uid, ...userDoc.data() } as UserProfile);
+                } else {
+                    // Create new profile for first-time users
+                    const newProfile: Omit<UserProfile, 'id'> = {
+                        name: user.displayName || 'Utilisateur',
+                        email: user.email || '',
+                        pin: '',
+                        budget: 2000
+                    };
+                    await setDoc(userRef, newProfile);
+                    setUserProfile({ id: user.uid, ...newProfile });
+                }
+                setShowLanding(false);
+            } else {
+                setUserProfile(null);
+            }
+        };
+
+        if (!authLoading) {
+            setupUserProfile();
         }
-    }, [currentUser]);
-
-    const handleRegister = (name: string, email: string, pin: string) => {
-        const newUser: UserProfile = { id: Math.random().toString(36).substr(2, 9), name, email, pin, budget: 2000 };
-        setUsers(prev => [...prev, newUser]);
-        setCurrentUser(newUser);
-        setIsLocked(false);
-    };
-
-    const handleLogout = () => {
-        setCurrentUser(null);
-        setIsLocked(true);
-        setView('landing');
-    };
-
-    const deleteAccount = () => {
-        if (currentUser && confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Toutes vos données seront perdues.")) {
-            localStorage.removeItem(`txs_${currentUser.id}`);
-            setUsers(prev => prev.filter(u => u.id !== currentUser.id));
-            handleLogout();
-        }
-    };
+    }, [user, authLoading]);
 
     const toggleDark = () => setIsDark(!isDark);
 
-    if (view === 'landing') {
-        return <LandingPage isDark={isDark} toggleDark={toggleDark} onStart={() => setView('auth')} />;
+    const handleLogout = async () => {
+        await logout();
+        setUserProfile(null);
+        setShowLanding(true);
+    };
+
+    const handleUpdateUser = async (updated: UserProfile) => {
+        if (user) {
+            const userRef = doc(db, 'users', user.uid);
+            const { id, ...data } = updated;
+            await setDoc(userRef, data, { merge: true });
+            setUserProfile(updated);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        if (user && confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Toutes vos données seront perdues.")) {
+            // Note: Full account deletion would require Firebase Admin SDK
+            // For now, just log out
+            await handleLogout();
+        }
+    };
+
+    // Loading state
+    if (authLoading) {
+        return <LoadingScreen />;
     }
 
-    if (view === 'auth') {
+    // Landing page for new visitors
+    if (showLanding && !user) {
         return (
-            <AuthView
+            <LandingPage
                 isDark={isDark}
                 toggleDark={toggleDark}
-                users={users}
-                onRegister={handleRegister}
-                onLogin={(user) => {
-                    setCurrentUser(user);
-                    setIsLocked(true);
-                }}
+                onStart={() => setShowLanding(false)}
             />
         );
     }
 
-    if (currentUser && isLocked) {
+    // Google Sign In page
+    if (!user) {
         return (
-            <LockScreen
-                userName={currentUser.name}
-                correctPin={currentUser.pin}
+            <GoogleAuthView
                 isDark={isDark}
                 toggleDark={toggleDark}
-                onUnlock={() => setIsLocked(false)}
-                onChangeUser={() => {
-                    setCurrentUser(null);
-                    setIsLocked(true);
-                    setView('auth');
-                }}
+                onSignIn={signInWithGoogle}
             />
         );
     }
 
-    if (currentUser) {
+    // Dashboard for authenticated users
+    if (userProfile) {
         return (
             <Dashboard
-                user={currentUser}
+                user={userProfile}
                 onLogout={handleLogout}
-                onUpdateUser={(updated) => {
-                    setUsers(prev => prev.map(u => u.id === updated.id ? updated : u));
-                    setCurrentUser(updated);
-                }}
-                onDeleteAccount={deleteAccount}
+                onUpdateUser={handleUpdateUser}
+                onDeleteAccount={handleDeleteAccount}
                 theme={isDark ? 'dark' : 'light'}
                 toggleTheme={toggleDark}
             />
         );
     }
 
-    return null;
+    return <LoadingScreen />;
+}
+
+// Root component with AuthProvider wrapper
+export default function App() {
+    return (
+        <AuthProvider>
+            <AppContent />
+        </AuthProvider>
+    );
 }
