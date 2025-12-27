@@ -10,27 +10,20 @@ import {
     ChevronLeft,
     ChevronRight,
     PieChart as LucidePieChart,
-    BarChart3,
-    Lightbulb,
     Moon,
     Sun,
     AlertTriangle
 } from 'lucide-react';
 import {
-    PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip,
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Area, AreaChart
+    ResponsiveContainer
 } from 'recharts';
 import { UserProfile, CATEGORIES } from '@/types';
 import { useFinanceData } from '@/hooks/useFinanceData';
-import { useSavingsGoals } from '@/hooks/useSavingsGoals';
-import { useRecurringTransactions } from '@/hooks/useRecurringTransactions';
 import { usePdfExport } from '@/hooks/usePdfExport';
 import { StatCard, BudgetProgress } from './DashboardComponents';
 import { TransactionList } from './TransactionList';
 import { TransactionModal } from './TransactionModal';
 import { SettingsModal } from './SettingsModal';
-import { SavingsGoals } from './SavingsGoals';
-import { RecurringTransactions } from './RecurringTransactions';
 
 interface DashboardProps {
     user: UserProfile;
@@ -58,12 +51,6 @@ export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount, theme
     const [isTxModalOpen, setIsTxModalOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [search, setSearch] = useState("");
-
-    // Savings Goals
-    const { goals, addGoal, addToGoal, deleteGoal } = useSavingsGoals(user);
-
-    // Recurring Transactions
-    const { recurringTxs, addRecurring, deleteRecurring, toggleRecurring } = useRecurringTransactions(user, addTransaction);
 
     // PDF Export
     const { exportMonthlyReport } = usePdfExport();
@@ -311,93 +298,6 @@ export const Dashboard = ({ user, onLogout, onUpdateUser, onDeleteAccount, theme
                             </div>
                         </section>
 
-                        <section className="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 p-8 shadow-sm transition-colors">
-                            <div className="flex items-center gap-3 mb-8">
-                                <div className="p-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 rounded-xl"><BarChart3 size={20} /></div>
-                                <h3 className="font-black text-slate-900 dark:text-white transition-colors">Tendances</h3>
-                            </div>
-                            <div className="h-[200px] w-full">
-                                {transactions.length > 0 && barData.some(d => d.income > 0 || d.expense > 0) ? (
-                                    <ResponsiveContainer width="100%" height={200} key={`trends-${transactions.length}`}>
-                                        <BarChart data={barData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
-                                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#94a3b8' }} />
-                                            <Bar dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} />
-                                            <Bar dataKey="expense" fill="#f43f5e" radius={[4, 4, 0, 0]} />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                ) : (
-                                    <div className="h-full flex items-center justify-center text-slate-400 text-sm italic">
-                                        Pas assez de données historiques
-                                    </div>
-                                )}
-                            </div>
-                        </section>
-
-                        {/* Balance Evolution Chart */}
-                        <section className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 p-6 shadow-sm transition-colors">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 rounded-xl"><TrendingUp size={20} /></div>
-                                <h3 className="font-black text-slate-900 dark:text-white transition-colors">Évolution du Solde</h3>
-                            </div>
-                            <div className="h-[180px] w-full">
-                                {transactions.length > 0 && balanceHistory.some(d => d.balance !== 0) ? (
-                                    <ResponsiveContainer width="100%" height={180} key={`evolution-${transactions.length}`}>
-                                        <AreaChart data={balanceHistory} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                                            <defs>
-                                                <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                                                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                                                </linearGradient>
-                                            </defs>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
-                                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 'bold', fill: '#94a3b8' }} />
-                                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#94a3b8' }} tickFormatter={(v) => `${v}€`} width={50} />
-                                            <RechartsTooltip
-                                                formatter={(value: number) => [`${value.toFixed(0)}€`, 'Solde']}
-                                                labelFormatter={(label) => `Solde en ${label}`}
-                                            />
-                                            <Area
-                                                type="monotone"
-                                                dataKey="balance"
-                                                stroke="#6366f1"
-                                                strokeWidth={2}
-                                                fill="url(#balanceGradient)"
-                                            />
-                                        </AreaChart>
-                                    </ResponsiveContainer>
-                                ) : (
-                                    <div className="h-full flex items-center justify-center text-slate-400 text-sm italic">
-                                        Ajoutez des transactions pour voir l'évolution
-                                    </div>
-                                )}
-                            </div>
-                        </section>
-
-                        <section className="bg-slate-900 dark:bg-indigo-600 rounded-[3rem] p-8 text-white relative overflow-hidden shadow-xl shadow-indigo-500/20">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="p-2 bg-white/20 rounded-xl"><Lightbulb size={20} /></div>
-                                <h3 className="font-black italic">Conseil du Moment</h3>
-                            </div>
-                            <p className="text-sm font-medium leading-relaxed opacity-90">{tip}</p>
-                        </section>
-
-                        {/* Savings Goals */}
-                        <SavingsGoals
-                            goals={goals}
-                            onAddGoal={addGoal}
-                            onAddToGoal={addToGoal}
-                            onDeleteGoal={deleteGoal}
-                        />
-
-                        {/* Recurring Transactions */}
-                        <RecurringTransactions
-                            recurringTxs={recurringTxs}
-                            onAdd={addRecurring}
-                            onDelete={deleteRecurring}
-                            onToggle={toggleRecurring}
-                        />
                     </div>
                 </div>
             </main>
