@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Lock, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from './ui/ThemeToggle';
@@ -15,27 +15,13 @@ export const LockScreen = ({ userName, correctPin, onUnlock, isDark, toggleDark 
     const [pin, setPin] = useState("");
     const [error, setError] = useState(false);
 
-    // Listen for keyboard input
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key >= '0' && e.key <= '9') {
-                handleKeyPress(e.key);
-            } else if (e.key === 'Backspace') {
-                setPin(prev => prev.slice(0, -1));
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [pin, correctPin]);
-
-    const handleKeyPress = (num: string) => {
-        if (pin.length < 4) {
-            const newPin = pin + num;
-            setPin(newPin);
+    const handleKeyPress = useCallback((num: string) => {
+        setPin(prevPin => {
+            if (prevPin.length >= 4) return prevPin;
+            const newPin = prevPin + num;
             if (newPin.length === 4) {
                 if (newPin === correctPin) {
-                    onUnlock();
+                    setTimeout(() => onUnlock(), 100);
                 } else {
                     setError(true);
                     setTimeout(() => {
@@ -44,8 +30,27 @@ export const LockScreen = ({ userName, correctPin, onUnlock, isDark, toggleDark 
                     }, 600);
                 }
             }
-        }
-    };
+            return newPin;
+        });
+    }, [correctPin, onUnlock]);
+
+    const handleDelete = useCallback(() => {
+        setPin(prev => prev.slice(0, -1));
+    }, []);
+
+    // Listen for keyboard input
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key >= '0' && e.key <= '9') {
+                handleKeyPress(e.key);
+            } else if (e.key === 'Backspace') {
+                handleDelete();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [handleKeyPress, handleDelete]);
 
     return (
         <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-3xl transition-colors">
