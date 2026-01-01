@@ -181,18 +181,20 @@ export const LandingPage = ({ onStart, isDark, toggleDark }: LandingPageProps) =
 
             {/* Footer Signature */}
             <footer className="py-6 text-center border-t border-slate-100 dark:border-slate-800 transition-colors">
-                <p className="text-sm text-slate-400 dark:text-slate-500">
-                    Made with <span className="text-rose-500">❤️</span> by{' '}
-                    <strong className="text-slate-600 dark:text-slate-300">Hamza DJOUDI</strong>
-                </p>
-                <a
-                    href="https://djoudi.dev"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-bold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
-                >
-                    djoudi.dev
-                </a>
+                <div className="signature-container">
+                    <p className="text-sm text-slate-400 dark:text-slate-500">
+                        Made with <span className="heart-emoji">❤️</span> by{' '}
+                        <strong className="text-slate-600 dark:text-slate-300">Hamza DJOUDI</strong>
+                    </p>
+                    <a
+                        href="https://djoudi.dev"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="signature-link text-sm font-bold"
+                    >
+                        djoudi.dev
+                    </a>
+                </div>
             </footer>
         </div>
     );
