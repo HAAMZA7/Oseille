@@ -1,25 +1,50 @@
-# Oseille 💸
+# 💸 Oseille
 
-**Application de gestion de budget personnelle.**
-*Design par Hamza DJOUDI.*
+> **Gérez votre budget et simulez vos aides sociales**
+
+Application de gestion financière permettant de simuler les aides sociales françaises (APL, RSA, Prime d'Activité, ARE).
+
+🔗 **[Essayer l'application](https://gold-skunk-718138.hostingersite.com/)**
+
+## ✨ Fonctionnalités
+
+### 🏠 Simulateurs d'aides
+- **APL** : Aide Personnalisée au Logement
+- **RSA** : Revenu de Solidarité Active
+- **Prime d'Activité** : Complément de revenus
+- **ARE** : Allocation de Retour à l'Emploi
+
+### 📊 Tableau de bord
+- Vue d'ensemble de votre situation
+- Graphiques interactifs
+- Estimation des montants
+
+## 🎯 Pour qui ?
+
+- 👨‍🎓 Étudiants
+- 👷 Salariés
+- 🏠 Demandeurs de logement
+- 👥 Familles
+
+## 🛠️ Stack Technique
+
+- **TypeScript** + **Vite**
+- **Tailwind CSS** pour le design
+- **Chart.js** pour les graphiques
+- **Hébergement** : Hostinger
+
+## 🚀 Installation locale
+
+```bash
+npm install
+npm run dev
+```
+
+## 📧 Contact
+
+- **Auteur** : [Hamza DJOUDI](https://djoudi.dev)
+- **Site** : [Oseille](https://gold-skunk-718138.hostingersite.com/)
 
 ---
 
-## 👤 Propriétaire
-**Hamza DJOUDI**
-
-## 🔒 Confidentialité & Sécurité
-Cette application est une solution **SaaS locale**. 
-- Aucune donnée n'est envoyée dans le cloud.
-- Tout est stocké sur votre appareil (LocalStorage).
-- Protection par Code PIN intégrée.
-
-## ⚡️ Fonctionnalités
-- Tableau de bord financier
-- Suivi des revenus et dépenses
-- Analyse graphique
-- Mode Sombre / Mode Clair
-- Exportation et Importation des données (JSON)
-
----
-© 2025 Hamza DJOUDI. Tous droits réservés.
+Made with ❤️ by [Hamza DJOUDI](https://djoudi.dev)
