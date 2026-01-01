@@ -1,14 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
-import { collection, addDoc, deleteDoc, doc, onSnapshot, query, where, orderBy } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { UserProfile, Transaction } from '@/types';
+import { financeService } from '@/services/financeService';
 
 export const useFinanceData = (currentUser: UserProfile | null) => {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [loading, setLoading] = useState(true);
 
-    // Real-time Firestore sync
+    // Real-time sync via Service Layer
     useEffect(() => {
         if (!currentUser?.id) {
             setTransactions([]);
@@ -16,25 +15,13 @@ export const useFinanceData = (currentUser: UserProfile | null) => {
             return;
         }
 
-        const q = query(
-            collection(db, 'transactions'),
-            where('userId', '==', currentUser.id)
+        const unsubscribe = financeService.subscribeToTransactions(
+            currentUser.id,
+            (txs) => {
+                setTransactions(txs);
+                setLoading(false);
+            }
         );
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const txs = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            })) as Transaction[];
-
-            // Sort by date descending
-            txs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-            setTransactions(txs);
-            setLoading(false);
-        }, (error) => {
-            console.error('Firestore error:', error);
-            setLoading(false);
-        });
 
         return () => unsubscribe();
     }, [currentUser?.id]);
@@ -55,35 +42,18 @@ export const useFinanceData = (currentUser: UserProfile | null) => {
 
     const addTransaction = async (tx: Transaction) => {
         if (!currentUser?.id) return;
-        try {
-            const { id, ...txData } = tx;
-            await addDoc(collection(db, 'transactions'), {
-                ...txData,
-                userId: currentUser.id
-            });
-        } catch (error) {
-            console.error('Error adding transaction:', error);
-        }
+        const { id, ...txData } = tx;
+        await financeService.addTransaction(currentUser.id, txData);
     };
 
     const deleteTransaction = async (txId: string) => {
-        try {
-            await deleteDoc(doc(db, 'transactions', txId));
-        } catch (error) {
-            console.error('Error deleting transaction:', error);
-        }
+        await financeService.deleteTransaction(txId);
     };
 
     const importData = async (data: Transaction[]) => {
         if (!currentUser?.id) return;
-        // Import each transaction to Firestore
-        for (const tx of data) {
-            const { id, ...txData } = tx;
-            await addDoc(collection(db, 'transactions'), {
-                ...txData,
-                userId: currentUser.id
-            });
-        }
+        const cleanData = data.map(({ id, ...rest }) => rest);
+        await financeService.importTransactions(currentUser.id, cleanData);
     };
 
     const exportData = () => {
