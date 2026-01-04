@@ -1,10 +1,10 @@
 # 💸 Oseille
 
-> **Gérez votre budget et simulez vos aides sociales**
+> **Gérez votre argent sans effort**
 
-Application de gestion financière permettant de simuler les aides sociales françaises (APL, RSA, Prime d'Activité, ARE).
+Application de gestion de budget et simulation d'aides sociales françaises (APL, RSA, Prime d'Activité, ARE).
 
-🔗 **[Essayer l'application](https://gold-skunk-718138.hostingersite.com/)**
+🔗 **[Essayer l'application](https://mon-oseille.vercel.app/)**
 
 ## ✨ Fonctionnalités
 
@@ -15,9 +15,14 @@ Application de gestion financière permettant de simuler les aides sociales fran
 - **ARE** : Allocation de Retour à l'Emploi
 
 ### 📊 Tableau de bord
-- Vue d'ensemble de votre situation
-- Graphiques interactifs
-- Estimation des montants
+- Vue d'ensemble de votre situation financière
+- Graphiques interactifs (Recharts)
+- Suivi des dépenses et revenus
+- Export PDF
+
+### 🔐 Authentification
+- Connexion Google (Firebase)
+- Données sécurisées et privées
 
 ## 🎯 Pour qui ?
 
@@ -28,10 +33,11 @@ Application de gestion financière permettant de simuler les aides sociales fran
 
 ## 🛠️ Stack Technique
 
-- **TypeScript** + **Vite**
+- **React** + **TypeScript** + **Vite**
 - **Tailwind CSS** pour le design
-- **Chart.js** pour les graphiques
-- **Hébergement** : Hostinger
+- **Recharts** pour les graphiques
+- **Firebase** pour l'authentification
+- **Hébergement** : Vercel
 
 ## 🚀 Installation locale
 
@@ -43,7 +49,7 @@ npm run dev
 ## 📧 Contact
 
 - **Auteur** : [Hamza DJOUDI](https://djoudi.dev)
-- **Site** : [Oseille](https://gold-skunk-718138.hostingersite.com/)
+- **Site** : [mon-oseille.vercel.app](https://mon-oseille.vercel.app/)
 
 ---
 
