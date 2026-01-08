@@ -4,7 +4,7 @@
 
 Application de gestion de budget et simulation d'aides sociales françaises (APL, RSA, Prime d'Activité, ARE).
 
-🔗 **[Essayer l'application](https://mon-oseille.vercel.app/)**
+🔗 **[Essayer l'application](https://oseille.djoudi.dev/)**
 
 ## ✨ Fonctionnalités
 
@@ -49,7 +49,7 @@ npm run dev
 ## 📧 Contact
 
 - **Auteur** : [Hamza DJOUDI](https://djoudi.dev)
-- **Site** : [mon-oseille.vercel.app](https://mon-oseille.vercel.app/)
+- **Site** : [oseille.djoudi.dev](https://oseille.djoudi.dev/)
 
 ---
 
