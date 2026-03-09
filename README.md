@@ -1,62 +1,43 @@
-# 💸 Oseille
+# Oseille
 
-> **Gérez votre argent sans effort**
+Application web de gestion financiere personnelle et de simulation d'aides sociales francaises.
 
-Application de gestion de budget et simulation d'aides sociales françaises (APL, RSA, Prime d'Activité, ARE).
+[Voir l'application](https://oseille.djoudi.dev/)
 
-🔗 **[Essayer l'application](https://oseille.djoudi.dev/)**
+## Ce que fait le projet
 
-## ✨ Fonctionnalités
+- simulation d'aides comme l'APL, le RSA, la Prime d'activite et l'ARE
+- tableau de bord financier
+- suivi des depenses et revenus
+- visualisation des donnees
+- export PDF
+- connexion utilisateur avec Firebase
 
-### 🏠 Simulateurs d'aides
-- **APL** : Aide Personnalisée au Logement
-- **RSA** : Revenu de Solidarité Active
-- **Prime d'Activité** : Complément de revenus
-- **ARE** : Allocation de Retour à l'Emploi
+## Stack
 
-### 📊 Tableau de bord
-- Vue d'ensemble de votre situation financière
-- Graphiques interactifs (Recharts)
-- Suivi des dépenses et revenus
-- Export PDF
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Recharts
+- Firebase
 
-### 🔐 Authentification
-- Connexion Google (Firebase)
-- Données sécurisées et privées
-
-## 🎯 Pour qui ?
-
-- 👨‍🎓 Étudiants
-- 👷 Salariés
-- 🏠 Demandeurs de logement
-- 👥 Familles
-
-## 🛠️ Stack Technique
-
-- **React** + **TypeScript** + **Vite**
-- **Tailwind CSS** pour le design
-- **Recharts** pour les graphiques
-- **Firebase** pour l'authentification
-- **Hébergement** : Vercel
-
-## 🚀 Installation locale
+## Lancer le projet
 
 ```bash
+git clone https://github.com/HAAMZA7/Oseille.git
+cd Oseille
 npm install
 npm run dev
 ```
 
-## 📧 Contact
+## Scripts utiles
 
-- **Auteur** : [Hamza DJOUDI](https://djoudi.dev)
-- **Site** : [oseille.djoudi.dev](https://oseille.djoudi.dev/)
+- `npm run dev`
+- `npm run build`
+- `npm run preview`
 
----
+## Auteur
 
-## 📄 Licence
-
-© 2025 Hamza DJOUDI - Tous droits réservés.
-
----
-
-Made with ❤️ by [Hamza DJOUDI](https://djoudi.dev)
+- Site : [djoudi.dev](https://djoudi.dev)
+- Demo : [oseille.djoudi.dev](https://oseille.djoudi.dev/)
